@@ -16,15 +16,18 @@ module chip_top(
 	wire reset = !(&reset_cnt);
 	always @(posedge clock)
 		reset_cnt <= reset_cnt + reset;
+	wire [7:0] soc_led;
 
 	TestHarness soc(
 		.uart_rx(uart_rx),
 		.uart_tx(uart_tx),
-		.led(~led),
+		.led(soc_led),
 		.clock(clock),
 		.reset(reset),
 		.io_success() // ignored
 	);
+
+	assign led = ~soc_led;
 endmodule // chip_top
 
 // divide input clock 'clki' (100 MHz) by ten
@@ -37,9 +40,18 @@ module pll_100_10(
 	(* MFG_ENABLE_FILTEROPAMP="1" *)
 	(* MFG_GMCREF_SEL="2" *)
 	EHXPLLL #(
-		.CLKI_DIV(10),
-		.CLKOP_DIV(12),
-		.CLKOP_CPHASE(11),
+        .PLLRST_ENA("DISABLED"),
+        .INTFB_WAKE("DISABLED"),
+        .STDBY_ENABLE("DISABLED"),
+        .DPHASE_SOURCE("DISABLED"),
+        .CLKOP_FPHASE(0),
+        .CLKOP_CPHASE(30),
+        .OUTDIVIDER_MUXA("DIVA"),
+        .CLKOP_ENABLE("ENABLED"),
+        .CLKOP_DIV(60),
+        .CLKFB_DIV(1),
+        .CLKI_DIV(10),
+        .FEEDBK_PATH("INT_OP")
 	) pll_i (
 		.CLKI(clki),
 		.CLKFB(clko),

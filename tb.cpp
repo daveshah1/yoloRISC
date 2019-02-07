@@ -1,5 +1,6 @@
 #include <iostream>
 #include "VTestHarness.h"
+#include <verilated_vcd_c.h>
 
 #define MAX_TIME 1000000
 
@@ -13,7 +14,8 @@ int main(int argc, char *argv[])
 {
 	// Initialize Verilator:
 	Verilated::commandArgs(argc, argv);
-
+	VerilatedVcdC	*m_trace;
+	Verilated::traceEverOn(true);
 	// Instantiate DUT:
 	VTestHarness *dut = new VTestHarness;
 
@@ -21,6 +23,10 @@ int main(int argc, char *argv[])
 	dut->clock = 0;
 	dut->reset = 1;
 	dut->uart_rx = 0;
+
+	m_trace = new VerilatedVcdC;
+	dut->trace(m_trace, 99);
+	m_trace->open("tb.vcd");
 
 	// keep track of LED output value
 	int led = 0;
@@ -32,7 +38,7 @@ int main(int argc, char *argv[])
 		if ((t_sim % 10) == 6) dut->clock = 0;
 
 		dut->eval();
-
+		m_trace->dump(t_sim);
 		if ((t_sim % 100000) == 0)
 			std::cout << "### +10k cycles" << std::endl;
 
@@ -41,6 +47,9 @@ int main(int argc, char *argv[])
 			std::cout << "### LED: " << led << std::endl;
 		}
 	}
+
+	m_trace->close();
+	m_trace = NULL;
 
 	// Clean up:
 	dut->final();

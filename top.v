@@ -3,6 +3,7 @@ module chip_top(
 	input        clkin,
 	input        uart_rx,
 	output       uart_tx,
+	output       uart_dbg,
 	output [7:0] led,
 );
 	wire clock;
@@ -28,6 +29,7 @@ module chip_top(
 	);
 
 	assign led = ~soc_led;
+	assign uart_dbg = uart_tx;
 endmodule // chip_top
 
 // divide input clock 'clki' (100 MHz) by ten
@@ -35,8 +37,8 @@ module pll_100_10(
 	input  clki,
 	output clko,
 );
-	(* ICP_CURRENT="12" *)
-	(* LPF_RESISTOR="8" *)
+	(* ICP_CURRENT="6" *)
+	(* LPF_RESISTOR="16" *)
 	(* MFG_ENABLE_FILTEROPAMP="1" *)
 	(* MFG_GMCREF_SEL="2" *)
 	EHXPLLL #(
@@ -45,13 +47,13 @@ module pll_100_10(
         .STDBY_ENABLE("DISABLED"),
         .DPHASE_SOURCE("DISABLED"),
         .CLKOP_FPHASE(0),
-        .CLKOP_CPHASE(30),
+        .CLKOP_CPHASE(64),
         .OUTDIVIDER_MUXA("DIVA"),
         .CLKOP_ENABLE("ENABLED"),
-        .CLKOP_DIV(60),
+        .CLKOP_DIV(65),
         .CLKFB_DIV(1),
         .CLKI_DIV(10),
-        .FEEDBK_PATH("INT_OP")
+        .FEEDBK_PATH("CLKOP")
 	) pll_i (
 		.CLKI(clki),
 		.CLKFB(clko),

@@ -4,11 +4,17 @@
 #define reg_uart_data   (*(volatile uint32_t*)0x60000004)
 #define reg_led         (*(volatile  uint8_t*)0x60000008)
 
+//#define SIMULATION
+
 void putchar(char c)
 {
 	if (c == '\n')
 		putchar('\r');
+	reg_led = c;
 	reg_uart_data = c;
+#ifndef SIMULATION
+	for (volatile int i = 0; i < 2000; i++);
+#endif
 }
 
 void print(const char *p)
@@ -27,12 +33,11 @@ void print_uint_bin(unsigned int num)
 // Simulation is much slower, so we want a much shorter delay.
 // Uncomment the following line to see LED activity during simulation:
 
-//#define SIMULATION
 
 #ifdef SIMULATION
   #define DELAY 5
 #else // FPGA synthesis
-  #define DELAY 200000
+  #define DELAY 200
 #endif
 void delay(void)
 {
@@ -41,8 +46,8 @@ void delay(void)
 
 int main(int argc, char *argv[])
 {
-	// 115200 baud at 10MHz
-	reg_uart_clkdiv = 87;
+	// 9600 baud at 10MHz
+	reg_uart_clkdiv = 1042;
 
 	for (unsigned int i = 0;; i++) {
 		print("Hello world!!!\n");

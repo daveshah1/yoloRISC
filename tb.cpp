@@ -2,7 +2,7 @@
 #include "VTestHarness.h"
 #include <verilated_vcd_c.h>
 
-#define MAX_TIME 1000000
+#define MAX_TIME 10000000
 
 // Simulation time:
 vluint64_t t_sim;
